@@ -44,28 +44,38 @@ st.bar_chart(total_tweets)
 
 # Visualization 2: Tweet Engagement (Likes and Retweets)
 st.header("Tweet Engagement (Likes and Retweets)")
-
-# Group by candidate and sum likes and retweet_count
 engagement_data = twitter_df.groupby('candidate').agg({'likes': 'sum', 'retweet_count': 'sum'}).reset_index()
-
-# Calculate total engagement and proportions
-engagement_data['total_engagement'] = engagement_data['likes'] + engagement_data['retweet_count']
-engagement_data['likes_proportion'] = engagement_data['likes'] / engagement_data['total_engagement']
-engagement_data['retweets_proportion'] = engagement_data['retweet_count'] / engagement_data['total_engagement']
-
-# Prepare data for plotting with proportions
-engagement_data_melted = engagement_data.melt(id_vars='candidate', value_vars=['likes_proportion', 'retweets_proportion'],
-                                              var_name='Engagement Type', value_name='Proportion')
-
-# Plot the proportions using plotly
-fig = px.bar(engagement_data_melted, x='candidate', y='Proportion', color='Engagement Type', 
-             title="Proportion of Likes and Retweets by Candidate", barmode='group',
-             labels={'likes_proportion': 'Likes', 'retweets_proportion': 'Retweets'},
-             color_discrete_map={'likes_proportion': '#1f77b4', 'retweets_proportion': '#ff7f0e'})
-
+fig = px.bar(engagement_data, x='candidate', y=['likes', 'retweet_count'], barmode='group', 
+             title="Total Likes and Retweets by Candidate")
 st.plotly_chart(fig)
 
-# Visualization 3: Tweets Over Time
+# Visualization 3: Proportion of Likes and Retweets
+# Group by candidate and calculate total likes, retweet counts, and tweet counts
+engagement_data = twitter_df.groupby('candidate').agg({
+    'likes': 'sum',          # Sum of likes for each candidate
+    'retweet_count': 'sum',  # Sum of retweets for each candidate
+    'tweet_id': 'count'      # Number of tweets (rows) for each candidate
+}).reset_index()
+
+# Calculate the proportion of likes and retweets against the total tweets (rows) for each candidate
+engagement_data['likes_proportion'] = (engagement_data['likes'] / engagement_data['tweet_id']).round(2)
+engagement_data['retweets_proportion'] = (engagement_data['retweet_count'] / engagement_data['tweet_id']).round(2)
+
+# Melt the DataFrame to reshape it for plotting
+engagement_data_melted = engagement_data.melt(id_vars='candidate', 
+                                              value_vars=['likes_proportion', 'retweets_proportion'],
+                                              var_name='Engagement Type', value_name='Proportion')
+
+# Plotting the combined proportions using Plotly
+fig = px.bar(engagement_data_melted, x='candidate', y='Proportion', color='Engagement Type',
+             barmode='group', title='Proportion of Total Likes and Retweets per Candidate Against Total Tweets',
+             labels={'Proportion': 'Proportion', 'candidate': 'Candidate'},
+             text='Proportion')
+
+# Display the bar chart in Streamlit
+st.plotly_chart(fig)
+
+# Visualization 4: Tweets Over Time
 st.header("Tweets Over Time")
 twitter_df['created_at'] = pd.to_datetime(twitter_df['created_at'])
 tweets_over_time = twitter_df['created_at'].dt.date.value_counts().sort_index()
