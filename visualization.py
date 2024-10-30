@@ -27,6 +27,9 @@ tab1, tab2, tab3 = st.tabs(["Exploratory Data Analysis", "Sentiment Analysis", "
 
 # Visualizations in tab 1
 with tab1:
+    st.write(r"Biden's total tweets:", twitter_df[twitter_df['candidate']=='biden']['candidate'].count())
+    st.write(r"Trump's total tweets:", twitter_df[twitter_df['candidate']=='trump']['candidate'].count())
+
     # Visualization 1: Total Tweets by Candidate
     
     # Plotting
@@ -100,9 +103,7 @@ with tab1:
     # Group by state and candidate to calculate tweet counts
     tweets_by_state_and_candidate = us_tweets.groupby(['state', 'candidate']).size().reset_index(name='Tweet Count')
 
-    # Display the data to check it’s being counted correctly
-    st.write("Tweet Count by State and Candidate:")
-    st.dataframe(tweets_by_state_and_candidate)
+    st.header("Tweets by States")
 
     # Add a dropdown filter for candidate selection
     candidate = st.selectbox("Select a candidate:", options=['Trump', 'Biden'])
@@ -302,7 +303,7 @@ with tab3:
         return top_emojis
 
     # Streamlit application
-    st.title("Top 10 Emojis for Biden and Trump")
+    st.title("Top 5 Emojis for Biden and Trump")
 
     # Load top emojis for both candidates
     biden_emojis = load_top_emojis('biden_emojis.csv')
