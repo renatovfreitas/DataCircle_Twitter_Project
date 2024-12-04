@@ -29,8 +29,16 @@ else:
     trump_sentiment_counts = trump_data['sentiment'].value_counts().reset_index()
     trump_sentiment_counts.columns = ['Sentiment', 'Count']
 
-    # Define shared colors for both charts
-    shared_colors = ['#1f77b4', '#ff7f0e', '#2ca02c']  # Blue, Orange, Green
+    # Define custom colors for Negative, Neutral, and Positive sentiments
+    sentiment_colors = {
+        'negative': '#ff4d4d',  # Red
+        'neutral': '#1f77b4',   # Blue
+        'positive': '#2ca02c'   # Green
+    }
+
+    # Map the sentiment labels to colors
+    biden_sentiment_counts['Color'] = biden_sentiment_counts['Sentiment'].map(sentiment_colors)
+    trump_sentiment_counts['Color'] = trump_sentiment_counts['Sentiment'].map(sentiment_colors)
 
     # Create combined figure with subplots
     fig = go.Figure()
@@ -42,7 +50,7 @@ else:
             values=biden_sentiment_counts['Count'],
             hole=0.4,
             name="Biden",
-            marker=dict(colors=shared_colors),
+            marker=dict(colors=biden_sentiment_counts['Color']),
             textinfo='percent+label',
             hoverinfo='label+percent+value',
             textfont=dict(size=18),
@@ -58,7 +66,7 @@ else:
             values=trump_sentiment_counts['Count'],
             hole=0.4,
             name="Trump",
-            marker=dict(colors=shared_colors),
+            marker=dict(colors=trump_sentiment_counts['Color']),
             textinfo='percent+label',
             hoverinfo='label+percent+value',
             textfont=dict(size=18),
@@ -70,7 +78,7 @@ else:
     # Layout configuration
     fig.update_layout(
         title=dict(
-            text="Sentiment Distribution for Biden and Trump",
+            text="Sentiment Distribution by Candidate",
             font=dict(color="white", size=24),
             x=0.5,  # Title aligned to the center
             xanchor='center'
@@ -97,3 +105,4 @@ else:
 
     # Display combined chart
     st.plotly_chart(fig, use_container_width=True)
+
